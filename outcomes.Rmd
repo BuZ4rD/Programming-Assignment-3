@@ -3,7 +3,10 @@ title: "script"
 author: "Mathias"
 date: "05/09/2020"
 output: html_document
+<<<<<<< HEAD
 
+=======
+>>>>>>> 24da21a6f14490a785d6e5e91b8cded73668bbce
 ---
 
 ###Assignements:
@@ -95,6 +98,10 @@ best ("NY","heart attack")
 
 
 ```{r pressure, echo=FALSE}
+<<<<<<< HEAD
+=======
+
+>>>>>>> 24da21a6f14490a785d6e5e91b8cded73668bbce
 rankhospital<- function(state="TX", outcome="pneumonia", num="best"){
   #rename inputs variables to avoid mistakes
   outcome_user <- outcome
@@ -131,7 +138,10 @@ rankhospital<- function(state="TX", outcome="pneumonia", num="best"){
 
     
   # Declare as numeric the column of rates
+<<<<<<< HEAD
   suppressWarnings(as.numeric("Not Available"))
+=======
+>>>>>>> 24da21a6f14490a785d6e5e91b8cded73668bbce
   data_state[,outcome_user] <- as.numeric(data_state[, outcome_user])
   
   # Delete NAs for the outcome
@@ -164,7 +174,12 @@ rankhospital<- function(state="TX", outcome="pneumonia", num="best"){
 return (output)
 }
 
+<<<<<<< HEAD
 rankhospital("MN","heart attack",2)
+=======
+undebug(rankedhospital)
+rankedhospital("MN","heart attack",2)
+>>>>>>> 24da21a6f14490a785d6e5e91b8cded73668bbce
 ```
 
 
@@ -216,7 +231,10 @@ rankall <- function(outcome, num){
     data_state <- data[which (data[, "state"] == state_user),]
       
     # Declare as numeric the column of rates
+<<<<<<< HEAD
     suppressWarnings(as.numeric(c("1", "2", "X")))
+=======
+>>>>>>> 24da21a6f14490a785d6e5e91b8cded73668bbce
     data_state[,outcome_user] <- as.numeric(data_state[, outcome_user])
     
     # Delete NAs for the outcome
