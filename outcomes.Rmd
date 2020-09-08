@@ -1,0 +1,311 @@
+---
+title: "script"
+author: "Mathias"
+date: "05/09/2020"
+output: html_document
+---
+
+###Assignements:
+https://d3c33hcgiwev3.cloudfront.net/_2a0d228f9a48b3de85eedf022225fac9_ProgAssignment3.pdf?Expires=1599350400&Signature=F7dXemecDec3gA1sqHsPtKxD0Dc9gNElnXLjgZp100O0WMZC~~QhIzOdfEm1eKhp5VTUrXPAhYfv~KuLYsnHJz-e8BQJgOMAnCEm0BfwQ7IBRZWic3oSnSk66daAFFETUo34ypAsk4Mv7Eq4IA6RrJrMTsA1Z3U2wkn~~vbFV84_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A
+
+### 1 PLOT THE 30-DAY MORTALITY
+
+```{r setup, include=FALSE}
+outcome <- read.csv("outcome-of-care-measures.csv", colClasses = "character")
+outcome[,11] <- as.numeric(outcome[,11])
+print (head(outcome))
+```
+```{r}
+hist(outcome[,11])
+```
+
+### 2 - Finding the best hospital in the state
+
+
+```{r}
+
+best <- function(state="TX", outcome="pneumonia"){
+  
+  #rename inputs variables to avoid mistakes
+  outcome_user <- outcome
+  state_user <- state
+  
+  # read csv file
+  data <- read.csv("outcome-of-care-measures.csv", colClasses = "character")
+  
+  # keep what we need:
+  data <- as.data.frame(cbind(data[,2],
+                              data[,7],
+                              data[,11],
+                              data[,17],
+                              data[,23]),
+                        stringAsFactors = FALSE)
+  
+  # Rename column
+  colnames(data) <- c("hospitals", "state", "heart attack", "heart failure", "pneumonia")
+  
+
+  # Check inputs variables (state and outcome wording)
+  if (!state_user  %in% data[,"state"]){
+    stop("invalid state")
+    }
+  else if (!outcome_user %in% c("pneumonia","heart failure","heart attack")){
+    stop("invalid outcome")
+    }
+  else {
+    print ("state and outcome OK")
+  
+  # Keep lines with correct state
+  data_state <- data[which (data[, "state"] == state_user),]
+  
+  # Declare as numeric the column of rates
+  data_state[,outcome_user] <- as.numeric(data_state[, outcome_user])
+  
+  # Retrieve the min data in the outcome rate column
+
+  #data_result <- data_state[, "hospitals"][which(data_state[,outcome_user] == min(data_state[,outcome_user], na.rm = TRUE))]
+  
+    data_result <- data_state[which(data_state[,outcome_user] == min(data_state[,outcome_user], na.rm = TRUE)), "hospitals"]
+
+  # Order 
+  if (length(data_result)>1){ 
+  data_result  <- data_result[order(data_result[,"hospitals"])]
+  }
+  
+  # 
+  output <- data_result[1]
+  }
+  
+return (output)
+}  
+```
+
+Some error messages but the stuff is working.
+
+
+```{r}
+debug(best)
+undebug(best)
+best ("NY","heart attack")
+```
+
+
+
+
+
+```{r pressure, echo=FALSE}
+
+rankhospital<- function(state="TX", outcome="pneumonia", num="best"){
+  #rename inputs variables to avoid mistakes
+  outcome_user <- outcome
+  state_user <- state
+  num_user <- num
+  
+  # read csv file
+  data <- read.csv("outcome-of-care-measures.csv", colClasses = "character")
+  
+  # keep what we need:
+  data <- as.data.frame(cbind(data[,2],
+                              data[,7],
+                              data[,11],
+                              data[,17],
+                              data[,23]),
+                        stringAsFactors = FALSE)
+  
+  # Rename column
+  colnames(data) <- c("hospitals", "state", "heart attack", "heart failure", "pneumonia")
+  
+  # Check inputs variables (state and outcome wording)
+  if (!state_user  %in% data[,"state"]){
+    stop("invalid state")
+    }
+  else if (!outcome_user %in% c("pneumonia","heart failure","heart attack")){
+    stop("invalid outcome")
+    }
+  else {
+    print ("state and outcome OK")
+
+          
+  # Keep lines with correct state
+  data_state <- data[which (data[, "state"] == state_user),]
+
+    
+  # Declare as numeric the column of rates
+  data_state[,outcome_user] <- as.numeric(data_state[, outcome_user])
+  
+  # Delete NAs for the outcome
+  data_clean <- data_state[!is.na(data_state[,outcome_user]),]
+
+  
+  # Order 
+  data_order <- data_clean[order(data_clean[, eval(outcome_user)], data_clean[, "hospitals"]), ]
+
+  # Check numeric or for the rank asked by the user
+  if (is.numeric(num_user)){
+    output <- data_order[,"hospitals"][num_user]
+    }
+  else if (!is.numeric(num_user)) {
+    if (num_user== "best"){
+      output <-data_order[,"hospitals"][1]
+      }
+    else if (num_user== "worst"){
+      
+      # reorder decreasing
+      data_order <- data_state[order(data_state[, eval(outcome_user)], data_state[, "hospitals"], decreasing = TRUE), ]
+      output <- data_order[,"hospitals"][1]
+      print (output)
+    }
+    else {
+      stop('invalid rank')
+    }
+  }
+  }
+return (output)
+}
+
+undebug(rankedhospital)
+rankedhospital("MN","heart attack",2)
+```
+
+
+
+```{r}
+
+rankall <- function(outcome, num){
+  
+  #rename inputs variables to avoid mistakes
+  outcome_user <- outcome
+  num_user <- num
+  
+  # read csv file
+  data <- read.csv("outcome-of-care-measures.csv", colClasses = "character")
+
+  # keep what we need:
+  data <- as.data.frame(cbind(data[,2],
+                              data[,7],
+                              data[,11],
+                              data[,17],
+                              data[,23]),
+                        stringAsFactors = FALSE)
+  
+  # Rename column
+  colnames(data) <- c("hospitals", "state", "heart attack", "heart failure", "pneumonia")
+  
+  # Check inputs variables (state and outcome wording)
+  if (!outcome_user %in% c("pneumonia","heart failure","heart attack")){
+    stop("invalid outcome")
+    }
+  else {
+    print ("state and outcome OK")
+
+  
+    # list states
+  US_state = unique(data[,"state"])
+
+
+  # Initialize the empty dataframe for results
+  output <- data.frame(hospital=integer(), state=character(),  stringsAsFactors=FALSE)
+  
+  count <- 0
+  for (state_user in US_state){
+    
+    # Counter
+    count <- count + 1
+    
+    # Keep lines with correct state
+    data_state <- data[which (data[, "state"] == state_user),]
+      
+    # Declare as numeric the column of rates
+    data_state[,outcome_user] <- as.numeric(data_state[, outcome_user])
+    
+    # Delete NAs for the outcome
+    data_clean <- data_state[!is.na(data_state[,outcome_user]),]
+    
+    # Order 
+    data_order <- data_clean[order(data_clean[, eval(outcome_user)], data_clean[, "hospitals"]), ]
+  
+    # Check numeric or for the rank asked by the user
+    if (is.numeric(num_user)){
+      result <- data_order[,"hospitals"][num_user]
+      }
+    else if (!is.numeric(num_user)) {
+      if (num_user== "best"){
+        result <-data_order[,"hospitals"][1]
+        }
+      else if (num_user== "worst"){
+        
+        # reorder decreasing
+        data_order <- data_state[order(data_state[, eval(outcome_user)], data_state[, "hospitals"], decreasing = TRUE), ]
+        result <- data_order[,"hospitals"][1]
+      }
+      else {
+        stop('invalid rank')
+      }
+    }
+    output[count,1] <- result
+    output[count,2] <- state_user
+    }
+
+  }
+  
+rownames(output) <- output[, 2]
+output <- output[order(output[, 2]),]
+return (output)  
+  
+}
+
+undebug(rankall)
+rankall("heart attack",20)
+  
+```
+
+
+Tests and quizz
+
+1.
+```{r}
+best("SC", "heart attack")
+```
+2.
+```{r}
+best("NY", "pneumonia")
+```
+3.
+```{r}
+best("AK", "pneumonia")
+```
+4.
+
+```{r}
+rankhospital("NC", "heart attack", "worst")
+```
+5.
+```{r}
+rankhospital("WA", "heart attack", 7)
+```
+6.
+```{r}
+rankhospital("TX", "pneumonia", 10)
+```
+7.
+```{r}
+rankhospital("NY", "heart attack", 7)
+```
+8.
+```{r}
+r <- rankall("heart attack", 4)
+as.character(subset(r, state == "HI")$hospital)
+```
+9.
+```{r}
+r <- rankall("pneumonia", "worst")
+as.character(subset(r, state == "NJ")$hospital)
+```
+10.
+```{r}
+r <- rankall("heart failure", 10)
+as.character(subset(r, state == "NV")$hospital)
+```
+
+
+
